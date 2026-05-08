@@ -158,8 +158,12 @@ public class RAM: Module {
         self.menuBar.widgets.filter{ $0.isActive }.forEach { (w: SWidget) in
             switch w.item {
             case let widget as Mini:
-                widget.setValue(value.usage)
-                widget.setPressure(value.pressure.value)
+                if w.type == .swapMini {
+                    widget.setValue(value.swap.total > 0 ? value.swap.used / value.swap.total : 0)
+                } else {
+                    widget.setValue(value.usage)
+                    widget.setPressure(value.pressure.value)
+                }
             case let widget as LineChart:
                 widget.setValue(value.usage)
                 widget.setPressure(value.pressure.value)
@@ -237,6 +241,13 @@ public class RAM: Module {
                 }
                 widget.setValue(text)
             case let widget as DotWidget: widget.setValue(value.pressure.value.pressureColor())
+            case let widget as SwapMemoryWidget:
+                let swapTotal = value.swap.total > 0 ? value.swap.total : 1
+                widget.setValue(
+                    used: Units(bytes: Int64(value.swap.used)).getReadableMemory(style: .memory),
+                    free: Units(bytes: Int64(value.swap.free)).getReadableMemory(style: .memory),
+                    usedPercentage: value.swap.used / swapTotal
+                )
             default: break
             }
         }

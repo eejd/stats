@@ -111,6 +111,25 @@
 				<true/>
 			</dict>
 		</dict>
+		<key>swap_mini</key>
+		<dict>
+			<key>Default</key>
+			<false/>
+			<key>Order</key>
+			<integer>9</integer>
+		</dict>
+		<key>swap_memory</key>
+		<dict>
+			<key>Default</key>
+			<false/>
+			<key>Order</key>
+			<integer>10</integer>
+			<key>Preview</key>
+			<dict>
+				<key>Value</key>
+				<string>1.25 GB, 6.75 GB</string>
+			</dict>
+		</dict>
 	</dict>
 	<key>Settings</key>
 	<dict>

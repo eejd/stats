@@ -27,7 +27,9 @@ public enum widget_t: String {
     case tachometer = "tachometer"
     case state = "state"
     case text = "text"
-    
+    case swapMini = "swap_mini"
+    case swapMemory = "swap_memory"
+
     public func new(module: String, config: NSDictionary, defaultWidget: widget_t) -> SWidget? {
         guard let widgetConfig: NSDictionary = config[self.rawValue] as? NSDictionary else { return nil }
         
@@ -78,6 +80,12 @@ public enum widget_t: String {
         case .text:
             preview = TextWidget(title: module, config: widgetConfig, preview: true)
             item = TextWidget(title: module, config: widgetConfig, preview: false)
+        case .swapMini:
+            preview = Mini(title: module, config: widgetConfig, preview: true)
+            item = Mini(title: module, config: widgetConfig, preview: false)
+        case .swapMemory:
+            preview = SwapMemoryWidget(title: module, config: widgetConfig, preview: true)
+            item = SwapMemoryWidget(title: module, config: widgetConfig, preview: false)
         default: break
         }
         
@@ -103,7 +111,7 @@ public enum widget_t: String {
                 } else if module == "Clock" {
                     width = 114
                 }
-            case is MemoryWidget:
+            case is MemoryWidget, is SwapMemoryWidget:
                 width = view.bounds.width + 8 + Constants.Widget.spacing*2
             case is BatteryWidget:
                 width = view.bounds.width - 3
@@ -142,6 +150,8 @@ public enum widget_t: String {
         case .tachometer: return localizedString("Tachometer widget")
         case .state: return localizedString("State widget")
         case .text: return localizedString("Text widget")
+        case .swapMini: return localizedString("Swap mini widget")
+        case .swapMemory: return localizedString("Swap memory widget")
         default: return ""
         }
     }
