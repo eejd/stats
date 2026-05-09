@@ -3,31 +3,28 @@
 <plist version="1.0">
 <dict>
 	<key>Name</key>
-	<string>RAM</string>
+	<string>ZFS</string>
 	<key>State</key>
-	<true/>
+	<false/>
 	<key>Symbol</key>
-	<string>memorychip</string>
+	<string>cylinder.split.1x2</string>
+	<key>AlternativeSymbol</key>
+	<string>internaldrive</string>
 	<key>Widgets</key>
 	<dict>
-		<key>label</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Order</key>
-			<integer>0</integer>
-		</dict>
 		<key>mini</key>
 		<dict>
 			<key>Default</key>
 			<true/>
+			<key>Title</key>
+			<string>ARC</string>
 			<key>Preview</key>
 			<dict>
 				<key>Value</key>
-				<string>0.58</string>
+				<string>0.92</string>
 			</dict>
 			<key>Order</key>
-			<integer>1</integer>
+			<integer>0</integer>
 		</dict>
 		<key>line_chart</key>
 		<dict>
@@ -36,7 +33,7 @@
 			<key>Color</key>
 			<string>systemAccent</string>
 			<key>Order</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<key>bar_chart</key>
 		<dict>
@@ -57,91 +54,72 @@
 				<key>Color</key>
 				<true/>
 				<key>Value</key>
-				<string>0.48</string>
+				<string>0.75</string>
 			</dict>
 			<key>Order</key>
-			<integer>3</integer>
+			<integer>2</integer>
 			<key>Unsupported colors</key>
 			<array>
 				<string>cluster</string>
 			</array>
 		</dict>
-		<key>pie_chart</key>
+		<key>zfs_l2arc</key>
 		<dict>
 			<key>Default</key>
 			<false/>
-			<key>Order</key>
-			<integer>4</integer>
-		</dict>
-		<key>memory</key>
-		<dict>
-			<key>Default</key>
-			<false/>
+			<key>Title</key>
+			<string>L2A</string>
 			<key>Preview</key>
 			<dict>
 				<key>Value</key>
-				<string>7.75 GB, 8.25 GB</string>
+				<string>0.87</string>
+			</dict>
+			<key>Order</key>
+			<integer>3</integer>
+		</dict>
+		<key>zfs_health</key>
+		<dict>
+			<key>Default</key>
+			<true/>
+			<key>Order</key>
+			<integer>4</integer>
+		</dict>
+		<key>zfs_iostat</key>
+		<dict>
+			<key>Default</key>
+			<false/>
+			<key>Symbols</key>
+			<dict>
+				<key>Input</key>
+				<string>R</string>
+				<key>Output</key>
+				<string>W</string>
+			</dict>
+			<key>Words</key>
+			<dict>
+				<key>Input</key>
+				<string>Read</string>
+				<key>Output</key>
+				<string>Write</string>
 			</dict>
 			<key>Order</key>
 			<integer>5</integer>
 		</dict>
-		<key>tachometer</key>
+		<key>zfs_free</key>
 		<dict>
 			<key>Default</key>
 			<false/>
+			<key>Title</key>
+			<string>FREE</string>
+			<key>Preview</key>
+			<dict>
+				<key>Value</key>
+				<string>0.44</string>
+			</dict>
 			<key>Order</key>
 			<integer>6</integer>
 		</dict>
-		<key>text</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Order</key>
-			<integer>7</integer>
-		</dict>
-		<key>state</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Order</key>
-			<integer>8</integer>
-			<key>Preview</key>
-			<dict>
-				<key>Value</key>
-				<true/>
-			</dict>
-		</dict>
-		<key>swap_mini</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Title</key>
-			<string>SWP</string>
-			<key>Order</key>
-			<integer>9</integer>
-		</dict>
-		<key>swap_memory</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Order</key>
-			<integer>10</integer>
-			<key>Preview</key>
-			<dict>
-				<key>Value</key>
-				<string>1.25 GB, 6.75 GB</string>
-			</dict>
-		</dict>
-		<key>swap_label</key>
-		<dict>
-			<key>Default</key>
-			<false/>
-			<key>Title</key>
-			<string>SWP</string>
-			<key>Order</key>
-			<integer>11</integer>
-		</dict>
-		<key>swap_bar_chart</key>
+		<key>zfs_free_bar</key>
 		<dict>
 			<key>Default</key>
 			<false/>
@@ -160,10 +138,10 @@
 				<key>Color</key>
 				<true/>
 				<key>Value</key>
-				<string>0.35</string>
+				<string>0.55</string>
 			</dict>
 			<key>Order</key>
-			<integer>12</integer>
+			<integer>7</integer>
 			<key>Unsupported colors</key>
 			<array>
 				<string>cluster</string>
