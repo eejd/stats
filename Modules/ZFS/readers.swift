@@ -79,16 +79,30 @@ internal class UsageReader: Reader<ZFS_Stats> {
 
     private func zpoolBinary() -> String? {
         if let cached = zpoolBin { return cached }
-        let candidates = [
-            "/usr/local/zfs/bin/zpool", // zfsonmacos canonical
-            "/usr/local/sbin/zpool",
-            "/usr/sbin/zpool",
-            "/sbin/zpool",
-            "/usr/local/bin/zpool",
-            "/opt/local/sbin/zpool",    // MacPorts
-            "/opt/local/bin/zpool"      // MacPorts
+
+        // Prefer PATH so any installation method (ports, manual, future) works.
+        // GUI apps may inherit a restricted PATH from launchd, so append known
+        // locations that are frequently absent from the GUI environment.
+        let pathDirs = (ProcessInfo.processInfo.environment["PATH"] ?? "")
+            .components(separatedBy: ":")
+            .filter { !$0.isEmpty }
+
+        let fallbackDirs = [
+            "/usr/local/zfs/bin",  // zfsonmacos canonical
+            "/usr/local/sbin",
+            "/usr/sbin",
+            "/sbin",
+            "/usr/local/bin",
+            "/opt/local/sbin",     // MacPorts
+            "/opt/local/bin",      // MacPorts
         ]
-        zpoolBin = candidates.first { FileManager.default.fileExists(atPath: $0) }
+
+        var seen = Set<String>()
+        let dirs = (pathDirs + fallbackDirs).filter { seen.insert($0).inserted }
+
+        zpoolBin = dirs
+            .map { ($0 as NSString).appendingPathComponent("zpool") }
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
         return zpoolBin
     }
 
