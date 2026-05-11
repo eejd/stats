@@ -15,6 +15,15 @@ import Kit
 internal class UsageReader: Reader<ZFS_Stats> {
     private var prevArcHits: Int64 = -1
     private var prevArcMisses: Int64 = -1
+    private var prevL2Hits: Int64 = -1
+    private var prevL2Misses: Int64 = -1
+
+    // Rolling window of per-interval (hits, misses) counts.
+    // Ratio is computed from the window totals so that low-traffic intervals
+    // contribute proportionally less (access-count-weighted, not time-weighted).
+    // At the default 2 s poll interval, 60 samples ≈ 2 minutes of history.
+    private var l2Window: [(hits: Int64, misses: Int64)] = []
+    private let l2WindowSize = 60
 
     private var zpoolBin: String? = nil
 
@@ -46,11 +55,18 @@ internal class UsageReader: Reader<ZFS_Stats> {
         prevArcHits   = stats.arcHits
         prevArcMisses = stats.arcMisses
 
-        // L2ARC access rates are far lower than ARC, so per-interval deltas produce
-        // a very noisy ratio (e.g. 1 hit + 19 misses = 5%, then 17 + 2 = 89%).
-        // Lifetime cumulative ratio is stable and more meaningful for a persistent cache.
-        let l2Total = stats.l2Hits + stats.l2Misses
-        stats.l2HitRatio = l2Total > 0 ? Double(stats.l2Hits) / Double(l2Total) : 0
+        if prevL2Hits >= 0 {
+            let dH = max(0, stats.l2Hits - prevL2Hits)
+            let dM = max(0, stats.l2Misses - prevL2Misses)
+            l2Window.append((dH, dM))
+            if l2Window.count > l2WindowSize { l2Window.removeFirst() }
+            let wH = l2Window.reduce(0) { $0 + $1.hits }
+            let wM = l2Window.reduce(0) { $0 + $1.misses }
+            let wT = wH + wM
+            stats.l2HitRatio = wT > 0 ? Double(wH) / Double(wT) : 0
+        }
+        prevL2Hits   = stats.l2Hits
+        prevL2Misses = stats.l2Misses
 
         if let zpool = zpoolBinary() {
             stats.pools = readPools(zpool: zpool)
