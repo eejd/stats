@@ -118,7 +118,8 @@ public class ZFS: Module {
                 case .zfsL2ARC:
                     widget.setValue(value.l2HitRatio)
                 case .zfsFree:
-                    widget.setValue(value.freeRatio)
+                    widget.setValue(1.0 - value.freeRatio)
+                    widget.setColorZones((0.8, 0.95))
                 default:
                     widget.setValue(value.arcHitRatio)
                 }

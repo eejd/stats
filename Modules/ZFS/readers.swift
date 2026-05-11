@@ -15,8 +15,6 @@ import Kit
 internal class UsageReader: Reader<ZFS_Stats> {
     private var prevArcHits: Int64 = -1
     private var prevArcMisses: Int64 = -1
-    private var prevL2Hits: Int64 = -1
-    private var prevL2Misses: Int64 = -1
 
     private var zpoolBin: String? = nil
 
@@ -48,14 +46,11 @@ internal class UsageReader: Reader<ZFS_Stats> {
         prevArcHits   = stats.arcHits
         prevArcMisses = stats.arcMisses
 
-        if prevL2Hits >= 0 {
-            let dH = max(0, stats.l2Hits - prevL2Hits)
-            let dM = max(0, stats.l2Misses - prevL2Misses)
-            let t  = dH + dM
-            stats.l2HitRatio = t > 0 ? Double(dH) / Double(t) : 0
-        }
-        prevL2Hits   = stats.l2Hits
-        prevL2Misses = stats.l2Misses
+        // L2ARC access rates are far lower than ARC, so per-interval deltas produce
+        // a very noisy ratio (e.g. 1 hit + 19 misses = 5%, then 17 + 2 = 89%).
+        // Lifetime cumulative ratio is stable and more meaningful for a persistent cache.
+        let l2Total = stats.l2Hits + stats.l2Misses
+        stats.l2HitRatio = l2Total > 0 ? Double(stats.l2Hits) / Double(l2Total) : 0
 
         if let zpool = zpoolBinary() {
             stats.pools = readPools(zpool: zpool)
@@ -72,7 +67,9 @@ internal class UsageReader: Reader<ZFS_Stats> {
             "/usr/local/sbin/zpool",
             "/usr/sbin/zpool",
             "/sbin/zpool",
-            "/usr/local/bin/zpool"
+            "/usr/local/bin/zpool",
+            "/opt/homebrew/sbin/zpool",
+            "/opt/homebrew/bin/zpool"
         ]
         zpoolBin = candidates.first { FileManager.default.fileExists(atPath: $0) }
         return zpoolBin
@@ -137,7 +134,7 @@ internal class UsageReader: Reader<ZFS_Stats> {
             ("T", 1024*1024*1024*1024),
             ("G", 1024*1024*1024),
             ("M", 1024*1024),
-            ("K", 1024),
+            ("K", 1024),  // zpool iostat may output uppercase K
             ("k", 1024),
             ("B", 1)
         ]
