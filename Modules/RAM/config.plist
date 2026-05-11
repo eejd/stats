@@ -115,6 +115,8 @@
 		<dict>
 			<key>Default</key>
 			<false/>
+			<key>Title</key>
+			<string>SWP</string>
 			<key>Order</key>
 			<integer>9</integer>
 		</dict>
@@ -129,6 +131,43 @@
 				<key>Value</key>
 				<string>1.25 GB, 6.75 GB</string>
 			</dict>
+		</dict>
+		<key>swap_label</key>
+		<dict>
+			<key>Default</key>
+			<false/>
+			<key>Title</key>
+			<string>SWP</string>
+			<key>Order</key>
+			<integer>11</integer>
+		</dict>
+		<key>swap_bar_chart</key>
+		<dict>
+			<key>Default</key>
+			<false/>
+			<key>Label</key>
+			<false/>
+			<key>Box</key>
+			<true/>
+			<key>Color</key>
+			<string>systemAccent</string>
+			<key>Preview</key>
+			<dict>
+				<key>Label</key>
+				<false/>
+				<key>Box</key>
+				<true/>
+				<key>Color</key>
+				<true/>
+				<key>Value</key>
+				<string>0.35</string>
+			</dict>
+			<key>Order</key>
+			<integer>12</integer>
+			<key>Unsupported colors</key>
+			<array>
+				<string>cluster</string>
+			</array>
 		</dict>
 	</dict>
 	<key>Settings</key>

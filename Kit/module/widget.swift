@@ -29,6 +29,8 @@ public enum widget_t: String {
     case text = "text"
     case swapMini = "swap_mini"
     case swapMemory = "swap_memory"
+    case swapLabel = "swap_label"
+    case swapBarChart = "swap_bar_chart"
 
     public func new(module: String, config: NSDictionary, defaultWidget: widget_t) -> SWidget? {
         guard let widgetConfig: NSDictionary = config[self.rawValue] as? NSDictionary else { return nil }
@@ -86,6 +88,12 @@ public enum widget_t: String {
         case .swapMemory:
             preview = SwapMemoryWidget(title: module, config: widgetConfig, preview: true)
             item = SwapMemoryWidget(title: module, config: widgetConfig, preview: false)
+        case .swapLabel:
+            preview = Label(title: module, config: widgetConfig)
+            item = Label(title: module, config: widgetConfig)
+        case .swapBarChart:
+            preview = BarChart(title: module, config: widgetConfig, preview: true)
+            item = BarChart(title: module, config: widgetConfig, preview: false)
         default: break
         }
         
@@ -97,6 +105,8 @@ public enum widget_t: String {
                 if module == "Battery" {
                     width = view.bounds.width + 3
                 }
+            case is BarChart where self == .swapBarChart:
+                width = 11 + (Constants.Widget.margin.x*2)
             case is BarChart:
                 if module == "GPU" || module == "RAM" || module == "Disk" || module == "Battery" {
                     width = 11 + (Constants.Widget.margin.x*2)
@@ -128,9 +138,10 @@ public enum widget_t: String {
         }
         
         if let item = item, let image = image {
-            return SWidget(self, defaultWidget: defaultWidget, module: module, item: item, image: image)
+            let order = widgetConfig["Order"] as? Int ?? 0
+            return SWidget(self, defaultWidget: defaultWidget, module: module, item: item, image: image, order: order)
         }
-        
+
         return nil
     }
     
@@ -152,6 +163,8 @@ public enum widget_t: String {
         case .text: return localizedString("Text widget")
         case .swapMini: return localizedString("Swap mini widget")
         case .swapMemory: return localizedString("Swap memory widget")
+        case .swapLabel: return localizedString("Swap label widget")
+        case .swapBarChart: return localizedString("Swap bar chart widget")
         default: return ""
         }
     }
@@ -265,9 +278,10 @@ public class SWidget {
         NextLog.shared.copy(category: self.module)
     }
     public var position: Int {
-        get { Store.shared.int(key: "\(self.module)_\(self.type)_position", defaultValue: 0) }
+        get { Store.shared.int(key: "\(self.module)_\(self.type)_position", defaultValue: self.defaultOrder) }
         set { Store.shared.set(key: "\(self.module)_\(self.type)_position", value: newValue) }
     }
+    private let defaultOrder: Int
     
     private var list: [widget_t] {
         get {
@@ -280,12 +294,13 @@ public class SWidget {
     private var menuBarItem: NSStatusItem? = nil
     private var originX: CGFloat
     
-    public init(_ type: widget_t, defaultWidget: widget_t, module: String, item: widget_p, image: NSImage) {
+    public init(_ type: widget_t, defaultWidget: widget_t, module: String, item: widget_p, image: NSImage, order: Int = 0) {
         self.type = type
         self.module = module
         self.item = item
         self.defaultWidget = defaultWidget
         self.image = image
+        self.defaultOrder = order
         self.originX = item.frame.origin.x
         
         self.item.widthHandler = { [weak self] in
@@ -554,7 +569,28 @@ public class MenuBar {
         guard let name = notification.userInfo?["module"] as? String, name == self.moduleName else {
             return
         }
-        self.view.recalculate(self.sortedWidgets)
+        if self.oneView {
+            self.view.recalculate(self.sortedWidgets)
+            return
+        }
+        // oneView=false: each active widget is its own NSStatusItem, positioned by macOS via
+        // "NSStatusItem Preferred Position <autosaveName>" in UserDefaults.standard.
+        // Collect those positions, sort ascending (smaller x = more left), reassign them to
+        // match the new desired order, then recreate each item so macOS restores the new positions.
+        let ordered = self.sortedWidgets.compactMap { t in self.activeWidgets.first(where: { $0.type == t }) }
+        guard ordered.count > 1 else { return }
+        let defaults = UserDefaults.standard
+        let key: (SWidget) -> String = { "NSStatusItem Preferred Position \($0.module)_\($0.type.rawValue)" }
+        let positions = ordered.map { defaults.double(forKey: key($0)) }
+        guard positions.allSatisfy({ $0 > 0 }), Set(positions).count == positions.count else { return }
+        let slots = positions.sorted()
+        for (i, widget) in ordered.enumerated() {
+            defaults.set(slots[i], forKey: key(widget))
+        }
+        for widget in ordered {
+            widget.setMenuBarItem(state: false)
+            widget.setMenuBarItem(state: true)
+        }
     }
 }
 
