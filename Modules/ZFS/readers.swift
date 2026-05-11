@@ -80,12 +80,12 @@ internal class UsageReader: Reader<ZFS_Stats> {
     private func zpoolBinary() -> String? {
         if let cached = zpoolBin { return cached }
         let candidates = [
-            "/usr/local/sbin/zpool",
+            "/usr/local/sbin/zpool",   // zfsonmacos default
             "/usr/sbin/zpool",
             "/sbin/zpool",
             "/usr/local/bin/zpool",
-            "/opt/homebrew/sbin/zpool",
-            "/opt/homebrew/bin/zpool"
+            "/opt/local/sbin/zpool",   // MacPorts
+            "/opt/local/bin/zpool"     // MacPorts
         ]
         zpoolBin = candidates.first { FileManager.default.fileExists(atPath: $0) }
         return zpoolBin
