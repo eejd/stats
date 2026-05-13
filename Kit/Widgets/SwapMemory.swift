@@ -2,7 +2,7 @@
 //  SwapMemory.swift
 //  Kit
 //
-//  Created by eejd on 08/05/2026.
+//  Created by Serhiy Mytrovtsiy on 13/05/2026.
 //  Using Swift 5.0.
 //  Running on macOS 10.15.
 //
@@ -13,7 +13,8 @@ import Cocoa
 
 public class SwapMemoryWidget: WidgetWrapper {
     private var orderReversedState: Bool = false
-    private var value: (String, String) = ("0", "0")
+    private var used: String = "0"
+    private var free: String = "0"
     private var percentage: Double = 0
     private var symbolsState: Bool = true
     private var colorState: SColor = .monochrome
@@ -21,14 +22,18 @@ public class SwapMemoryWidget: WidgetWrapper {
     private let width: CGFloat = 50
 
     public init(title: String, config: NSDictionary?, preview: Bool = false) {
-        if let config {
-            var configuration = config
-            if preview, let previewConfig = config["Preview"] as? NSDictionary {
-                configuration = previewConfig
-                if let raw = configuration["Value"] as? String {
-                    let parts = raw.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-                    if parts.count == 2 {
-                        self.value = (parts[0], parts[1])
+        if config != nil {
+            var configuration = config!
+
+            if preview {
+                if let previewConfig = config!["Preview"] as? NSDictionary {
+                    configuration = previewConfig
+                    if let value = configuration["Value"] as? String {
+                        let values = value.split(separator: ",").map { String($0) }
+                        if values.count == 2 {
+                            self.used = values[0]
+                            self.free = values[1]
+                        }
                     }
                 }
             }
@@ -48,6 +53,10 @@ public class SwapMemoryWidget: WidgetWrapper {
             self.symbolsState = Store.shared.bool(key: "\(self.title)_\(self.type.rawValue)_symbols", defaultValue: self.symbolsState)
             self.colorState = SColor.fromString(Store.shared.string(key: "\(self.title)_\(self.type.rawValue)_color", defaultValue: self.colorState.key))
         }
+
+        if preview {
+            self.orderReversedState = false
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -62,9 +71,8 @@ public class SwapMemoryWidget: WidgetWrapper {
         var width: CGFloat = self.width
         var x: CGFloat = 0
 
-        // Top row = used, bottom row = free (reversed by orderReversedState)
-        let usedY: CGFloat = self.orderReversedState ? 1 : rowHeight + 1
-        let freeY: CGFloat = self.orderReversedState ? rowHeight + 1 : 1
+        let freeY: CGFloat = !self.orderReversedState ? rowHeight + 1 : 1
+        let usedY: CGFloat = !self.orderReversedState ? 1 : rowHeight + 1
 
         let style = NSMutableParagraphStyle()
         style.alignment = .right
@@ -75,49 +83,56 @@ public class SwapMemoryWidget: WidgetWrapper {
         ]
 
         if self.symbolsState {
-            var rect = CGRect(x: Constants.Widget.margin.x, y: usedY, width: letterWidth, height: rowHeight)
-            NSAttributedString(string: "U:", attributes: attributes).draw(with: rect)
+            var rect = CGRect(x: Constants.Widget.margin.x, y: freeY, width: letterWidth, height: rowHeight)
+            var str = NSAttributedString(string: "F:", attributes: attributes)
+            str.draw(with: rect)
 
-            rect = CGRect(x: Constants.Widget.margin.x, y: freeY, width: letterWidth, height: rowHeight)
-            NSAttributedString(string: "F:", attributes: attributes).draw(with: rect)
+            rect = CGRect(x: Constants.Widget.margin.x, y: usedY, width: letterWidth, height: rowHeight)
+            str = NSAttributedString(string: "U:", attributes: attributes)
+            str.draw(with: rect)
 
             x = letterWidth + Constants.Widget.spacing * 2
             width += x
         }
 
-        let usedColor: NSColor
-        let freeColor: NSColor
+        var freeColor: NSColor = .controlAccentColor
+        var usedColor: NSColor = .controlAccentColor
         switch self.colorState {
         case .systemAccent:
-            usedColor = .controlAccentColor
             freeColor = .controlAccentColor
+            usedColor = .controlAccentColor
         case .utilization:
-            usedColor = self.percentage.usageColor()
             freeColor = (1 - self.percentage).usageColor()
+            usedColor = self.percentage.usageColor()
         case .monochrome:
-            usedColor = isDarkMode ? .white : .black
             freeColor = isDarkMode ? .white : .black
+            usedColor = isDarkMode ? .white : .black
         default:
-            let c = self.colorState.additional as? NSColor ?? .controlAccentColor
-            usedColor = c
-            freeColor = c
+            freeColor = self.colorState.additional as? NSColor ?? .controlAccentColor
+            usedColor = self.colorState.additional as? NSColor ?? .controlAccentColor
         }
 
-        attributes[.foregroundColor] = usedColor
-        NSAttributedString(string: self.value.0, attributes: attributes)
-            .draw(with: CGRect(x: x, y: usedY, width: width - x, height: rowHeight))
-
         attributes[.foregroundColor] = freeColor
-        NSAttributedString(string: self.value.1, attributes: attributes)
-            .draw(with: CGRect(x: x, y: freeY, width: width - x, height: rowHeight))
+        var rect = CGRect(x: x, y: freeY, width: width - x, height: rowHeight)
+        var str = NSAttributedString(string: self.free, attributes: attributes)
+        str.draw(with: rect)
+
+        attributes[.foregroundColor] = usedColor
+        rect = CGRect(x: x, y: usedY, width: width - x, height: rowHeight)
+        str = NSAttributedString(string: self.used, attributes: attributes)
+        str.draw(with: rect)
 
         self.setWidth(width + (Constants.Widget.margin.x * 2))
     }
 
     public func setValue(used: String, free: String, usedPercentage: Double) {
-        self.value = (used, free)
+        self.used = used
+        self.free = free
         self.percentage = usedPercentage
-        DispatchQueue.main.async { self.display() }
+
+        DispatchQueue.main.async {
+            self.display()
+        }
     }
 
     public override func settings() -> NSView {
@@ -126,7 +141,7 @@ public class SwapMemoryWidget: WidgetWrapper {
         view.addArrangedSubview(PreferencesSection([
             PreferencesRow(localizedString("Color"), component: selectView(
                 action: #selector(self.toggleColor),
-                items: SColor.allCases.filter({ $0 != .cluster && $0 != .pressure }),
+                items: SColor.allCases.filter({ $0 != .cluster }),
                 selected: self.colorState.key
             )),
             PreferencesRow(localizedString("Show symbols"), component: switchView(
