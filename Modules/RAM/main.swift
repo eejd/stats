@@ -168,7 +168,11 @@ public class RAM: Module {
                 widget.setValue(value.usage)
                 widget.setPressure(value.pressure.value)
             case let widget as BarChart:
-                if self.splitValueState {
+                if w.type == .swapBarChart {
+                    let swapTotal = value.swap.total > 0 ? value.swap.total : 1
+                    widget.setValue([[ColorValue(value.swap.used / swapTotal)]])
+                    widget.setColorZones((0.8, 0.95))
+                } else if self.splitValueState {
                     widget.setValue([[
                         ColorValue(value.app/total, color: self.appColor),
                         ColorValue(value.wired/total, color: self.wiredColor),

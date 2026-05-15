@@ -209,6 +209,7 @@
 		9AF9EE0F2464875F005D2270 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF9EE0E2464875F005D2270 /* main.swift */; };
 		9AF9EE1124648ADC005D2270 /* readers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF9EE1024648ADC005D2270 /* readers.swift */; };
 		AA00000000000000000000A1 /* libIOReport.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C1E45552D11D66200525864 /* libIOReport.tbd */; };
+		BFCEBB992FB4A02500482FED /* SwapMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFCEBB982FB4A02500482FED /* SwapMemory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -723,6 +724,7 @@
 		9AF9EE192464A7B3005D2270 /* config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
 		B8F0D4F1259D19B100AAFAAF /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		BB9E59E725BB5F5E004AED95 /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BFCEBB982FB4A02500482FED /* SwapMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwapMemory.swift; sourceTree = "<group>"; };
 		C904AECF255939DB004A9EBC /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CBF35F8F258CF80000B2BA41 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE47845D298F55F900F564FD /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1051,6 +1053,7 @@
 				9A9B8C9C27149A3700218374 /* Tachometer.swift */,
 				9AEBBE4C28D773430082A6A1 /* Dot.swift */,
 				5CAA50712C8E417700B13E13 /* Text.swift */,
+				BFCEBB982FB4A02500482FED /* SwapMemory.swift */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -2107,6 +2110,7 @@
 				5C038CF62D86EE8A00516809 /* Remote.swift in Sources */,
 				9A2848202666AB3600EC1F6D /* types.swift in Sources */,
 				9A28481E2666AB3600EC1F6D /* extensions.swift in Sources */,
+				BFCEBB992FB4A02500482FED /* SwapMemory.swift in Sources */,
 				9A2848092666AB3000EC1F6D /* Store.swift in Sources */,
 				9A28481F2666AB3600EC1F6D /* constants.swift in Sources */,
 				9A28480A2666AB3000EC1F6D /* SystemKit.swift in Sources */,
