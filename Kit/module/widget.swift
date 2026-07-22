@@ -31,6 +31,11 @@ public enum widget_t: String {
     case swapMemory = "swap_memory"
     case swapLabel = "swap_label"
     case swapBarChart = "swap_bar_chart"
+    case zfsL2ARC = "zfs_l2arc"
+    case zfsHealth = "zfs_health"
+    case zfsIOStat = "zfs_iostat"
+    case zfsFree = "zfs_free"
+    case zfsFreeBar = "zfs_free_bar"
 
     public func new(module: String, config: NSDictionary, defaultWidget: widget_t) -> SWidget? {
         guard let widgetConfig: NSDictionary = config[self.rawValue] as? NSDictionary else { return nil }
@@ -94,6 +99,21 @@ public enum widget_t: String {
         case .swapBarChart:
             preview = BarChart(title: module, config: widgetConfig, preview: true)
             item = BarChart(title: module, config: widgetConfig, preview: false)
+        case .zfsL2ARC:
+            preview = Mini(title: module, config: widgetConfig, preview: true)
+            item = Mini(title: module, config: widgetConfig, preview: false)
+        case .zfsHealth:
+            preview = ZFSHealthWidget(title: module, config: widgetConfig, preview: true)
+            item = ZFSHealthWidget(title: module, config: widgetConfig, preview: false)
+        case .zfsIOStat:
+            preview = SpeedWidget(title: module, config: widgetConfig, preview: true)
+            item = SpeedWidget(title: module, config: widgetConfig, preview: false)
+        case .zfsFree:
+            preview = Mini(title: module, config: widgetConfig, preview: true)
+            item = Mini(title: module, config: widgetConfig, preview: false)
+        case .zfsFreeBar:
+            preview = BarChart(title: module, config: widgetConfig, preview: true)
+            item = BarChart(title: module, config: widgetConfig, preview: false)
         default: break
         }
         
@@ -105,7 +125,9 @@ public enum widget_t: String {
                 if module == "Battery" {
                     width = view.bounds.width + 3
                 }
-            case is BarChart where self == .swapBarChart:
+            case is ZFSHealthWidget:
+                width = view.bounds.width
+            case is BarChart where self == .swapBarChart || self == .zfsFreeBar:
                 width = 11 + (Constants.Widget.margin.x*2)
             case is BarChart:
                 if module == "GPU" || module == "RAM" || module == "Disk" || module == "Battery" {
@@ -165,6 +187,11 @@ public enum widget_t: String {
         case .swapMemory: return localizedString("Swap memory widget")
         case .swapLabel: return localizedString("Swap label widget")
         case .swapBarChart: return localizedString("Swap bar chart widget")
+        case .zfsL2ARC: return localizedString("ZFS L2ARC widget")
+        case .zfsHealth: return localizedString("ZFS pool health widget")
+        case .zfsIOStat: return localizedString("ZFS IO stat widget")
+        case .zfsFree: return localizedString("ZFS free space widget")
+        case .zfsFreeBar: return localizedString("ZFS free bar chart widget")
         default: return ""
         }
     }
